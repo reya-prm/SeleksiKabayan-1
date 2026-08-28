@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('penjualans', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('pelanggan_id')->nullable()->constrained('pelanggans')->nullOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->unsignedInteger('total_harga');
             $table->timestamps();
         });
     }

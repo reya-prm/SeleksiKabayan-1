@@ -93,10 +93,4 @@ class BarangController extends Controller
         return redirect()->route('barang.databarang')->with('success', 'Barang berhasil dihapus.');
     }
 
-    public function kasir()
-    {
-        $barang = Barang::all();
-
-        return view('barang.kasir', compact('barang'));
-    }
 }

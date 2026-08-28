@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('detail_penjualans', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('penjualan_id')->constrained('penjualans')->cascadeOnDelete();
+            $table->foreignId('barang_id')->constrained('barangs')->cascadeOnDelete();
+            $table->unsignedInteger('qty');
+            $table->unsignedInteger('harga_jual_saat_transaksi');
+            $table->unsignedInteger('subtotal');
             $table->timestamps();
         });
     }

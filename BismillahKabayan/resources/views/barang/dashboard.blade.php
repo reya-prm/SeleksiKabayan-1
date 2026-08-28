@@ -23,25 +23,25 @@
 
                         <div class="shrink-0">
                             <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-                                alt="Your Company"
-                                class="size-8" />
+                                alt="Your Company" class="size-8" />
                         </div>
 
                         <div class="hidden md:block">
                             <div class="ml-10 flex items-baseline space-x-4">
 
-                                <a href="{{ route('barang.dashboard') }}"
-                                    aria-current="page"
+                                <a href="{{ route('barang.dashboard') }}" aria-current="page"
                                     class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-white">
                                     Dashboard
                                 </a>
 
-                                <a href="{{ route('barang.kasir') }}"
-                                    class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
-                                    Kasir
-                                </a>
+                                @if (auth()->user()->role == 'operator')
+                                    <a href="{{ route('barang.kasir') }}"
+                                        class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                                        Kasir
+                                    </a>
+                                @endif
 
-                                @if(auth()->user()->role == 'administrator')
+                                @if (auth()->user()->role == 'administrator')
                                     <a href="{{ route('barang.databarang') }}"
                                         class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">
                                         Data Barang
@@ -99,19 +99,44 @@
 
                 {{-- isi konten --}}
 
-                @if(auth()->user()->role == 'administrator')
-
-                    <p class="text-gray-700">
-                        admin (semua fitur)
-                    </p>
-
-                @else
-
-                    <p class="text-gray-700">
-                        operator (transaksi)
-                    </p>
-
-                @endif
+                <div
+                    class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default">
+                    <table class="w-full text-sm text-left rtl:text-right text-body">
+                        <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 font-medium">SKU</th>
+                                <th scope="col" class="px-6 py-3 font-medium">Nama Barang</th>
+                                <th scope="col" class="px-6 py-3 font-medium">Kategori</th>
+                                <th scope="col" class="px-6 py-3 font-medium">Satuan</th>
+                                <th scope="col" class="px-6 py-3 font-medium">Harga Pokok</th>
+                                <th scope="col" class="px-6 py-3 font-medium">Harga Jual</th>
+                                <th scope="col" class="px-6 py-3 font-medium">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($barang as $item)
+                                <tr
+                                    class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+                                    <td class="px-6 py-4">{{ $item->sku }}</td>
+                                    <td class="px-6 py-4">{{ $item->nama_barang }}</td>
+                                    <td class="px-6 py-4">{{ $item->kategori }}</td>
+                                    <td class="px-6 py-4">{{ $item->satuan }}</td>
+                                    <td class="px-6 py-4">{{ $item->harga_pokok }}</td>
+                                    <td class="px-6 py-4">{{ $item->harga_jual }}</td>
+                                    <td class="px-6 py-4">
+                                        {{ $item->status_aktif ? 'Aktif' : 'Nonaktif' }}
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="px-6 py-4 text-center text-gray-400">
+                                        Belum ada data barang.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
 
             </div>
 
