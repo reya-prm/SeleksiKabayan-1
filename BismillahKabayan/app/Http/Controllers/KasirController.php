@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
+use App\Models\DetailPenjualan;
 use App\Models\Penjualan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -81,5 +82,19 @@ class KasirController extends Controller
         session()->forget('kasir_cart');
 
         return redirect()->route('barang.kasir')->with('success', 'Transaksi berhasil disimpan.');
+    }
+
+    public function riwayat()
+    {   
+        $data = DetailPenjualan::all();
+        return view('barang.riwayat', compact('data'));
+    }
+
+    public function destroyKasir(string $id)
+    {
+        $hapusData = DetailPenjualan::findOrFail($id);
+        $hapusData->delete();
+
+        return redirect()->route('barang.riwayat');
     }
 }
