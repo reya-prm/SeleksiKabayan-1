@@ -34,12 +34,10 @@
                                     Dashboard
                                 </a>
 
-                                @if (auth()->user()->role == 'operator')
                                     <a href="{{ route('barang.kasir') }}"
                                         class="rounded-md  px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                                         Kasir
                                     </a>
-                                @endif
 
                                 @if (auth()->user()->role == 'administrator')
                                     <a href="{{ route('barang.databarang') }}"
@@ -48,12 +46,10 @@
                                     </a>
                                 @endif
 
-                                @if (auth()->user()->role == 'operator')
                                     <a href="{{ route('barang.riwayat') }}"
                                         class="rounded-md px-3 bg-gray-950/50 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">
                                         Riwayat
                                     </a>
-                                @endif
 
                             </div>
                         </div>
@@ -108,7 +104,6 @@
                 <table class="w-full text-sm text-left rtl:text-right text-body">
                     <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
                         <tr>
-                            <th scope="col" class="px-6 py-3 font-medium">Id Penjualan</th>
                             <th scope="col" class="px-6 py-3 font-medium">Id Barang</th>
                             <th scope="col" class="px-6 py-3 font-medium">Qty</th>
                             <th scope="col" class="px-6 py-3 font-medium">Harga</th>
@@ -121,7 +116,6 @@
                         @foreach ($data as $item)
                             <tr
                                 class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                                <td class="px-6 py-4">{{ $item->penjualan_id }}</td>
                                 <td class="px-6 py-4">{{ $item->barang_id }}</td>
                                 <td class="px-6 py-4">{{ $item->qty }}</td>
                                 <td class="px-6 py-4">{{ $item->harga_jual_saat_transaksi }}</td>

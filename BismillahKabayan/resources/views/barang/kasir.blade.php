@@ -8,7 +8,7 @@
 
     @vite('resources/css/app.css')
 
-    <title>Dashboard</title>
+    <title>Dashboard reya</title>
 </head>
 
 <body>
@@ -34,12 +34,11 @@
                                     Dashboard
                                 </a>
 
-                                @if (auth()->user()->role == 'operator')
                                     <a href="{{ route('barang.kasir') }}"
                                         class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
                                         Kasir
                                     </a>
-                                @endif
+
 
                                 @if (auth()->user()->role == 'administrator')
                                     <a href="{{ route('barang.databarang') }}"
@@ -48,12 +47,11 @@
                                     </a>
                                 @endif
 
-                                @if (auth()->user()->role == 'operator')
+
                                     <a href="{{ route('barang.riwayat') }}"
                                         class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">
                                         Riwayat
                                     </a>
-                                @endif
 
                             </div>
                         </div>
@@ -105,13 +103,6 @@
             <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
                 {{-- isi konten --}}
-
-                @if (auth()->user()->role == 'administrator')
-
-                    <p class="text-gray-700">
-                        admin (semua fitur)
-                    </p>
-                @else
                     <main>
                         <div class="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
 
@@ -222,8 +213,6 @@
 
                         </div>
                     </main>
-
-                @endif
 
             </div>
 
