@@ -109,7 +109,6 @@
                             <th scope="col" class="px-6 py-3 font-medium">Harga</th>
                             <th scope="col" class="px-6 py-3 font-medium">SubTotal</th>
                             <th scope="col" class="px-6 py-3 font-medium">Tanggal Pembelian</th>
-                            <th scope="col" class="px-6 py-3 font-medium">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -121,15 +120,6 @@
                                 <td class="px-6 py-4">{{ $item->harga_jual_saat_transaksi }}</td>
                                 <td class="px-6 py-4">{{ $item->subtotal }}</td>
                                 <td class="px-6 py-4">{{ $item->created_at }}</td>
-                                <td class="px-6 py-4">
-                                    <form action="{{ route('barang.destroykasir', $item->id) }}" method="POST"
-                                        class="inline"
-                                        >
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:underline">Hapus</button>
-                                    </form>
-                                </td>
                         @endforeach
                     </tbody>
                 </table>

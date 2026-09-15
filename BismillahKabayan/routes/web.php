@@ -13,7 +13,6 @@ Route::post('/kasir/tambah', [KasirController::class, 'tambah'])->name('barang.k
 Route::delete('/kasir/hapus/{barangId}', [KasirController::class, 'hapusItem'])->name('barang.kasir.hapus');
 Route::post('/kasir', [KasirController::class, 'store'])->name('barang.kasir.store');
 Route::get('/riwayat', [KasirController::class, 'riwayat'])->name('barang.riwayat');
-Route::delete('/riwayat/{id}', [KasirController::class, 'destroyKasir'])->name('barang.destroykasir');
 
 Route::middleware('auth')->group(function () {
 

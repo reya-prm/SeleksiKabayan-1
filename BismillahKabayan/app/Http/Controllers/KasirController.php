@@ -90,11 +90,4 @@ class KasirController extends Controller
         return view('barang.riwayat', compact('data'));
     }
 
-    public function destroyKasir(string $id)
-    {
-        $hapusData = DetailPenjualan::findOrFail($id);
-        $hapusData->delete();
-
-        return redirect()->route('barang.riwayat');
-    }
 }

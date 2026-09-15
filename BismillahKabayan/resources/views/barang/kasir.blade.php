@@ -8,7 +8,7 @@
 
     @vite('resources/css/app.css')
 
-    <title>Dashboard reya</title>
+    <title>Kasir</title>
 </head>
 
 <body>
