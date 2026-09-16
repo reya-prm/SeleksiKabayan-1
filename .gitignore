@@ -1,1 +1,4 @@
-/BismillahKabayan.zip
+.env
+/vendor
+/node_modules
+/public/storage
