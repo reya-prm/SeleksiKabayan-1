@@ -34,11 +34,6 @@
                                     Dashboard
                                 </a>
 
-                                    <a href="{{ route('barang.kasir') }}"
-                                        class="rounded-md  px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
-                                        Kasir
-                                    </a>
-
                                 @if (auth()->user()->role == 'administrator')
                                     <a href="{{ route('barang.databarang') }}"
                                         class="rounded-md  px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">
@@ -46,10 +41,15 @@
                                     </a>
                                 @endif
 
-                                    <a href="{{ route('barang.riwayat') }}"
-                                        class="rounded-md px-3 bg-gray-950/50 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">
-                                        Riwayat
-                                    </a>
+                                <a href="{{ route('barang.kasir') }}"
+                                    class="rounded-md  px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                                    Kasir
+                                </a>
+
+                                <a href="{{ route('barang.riwayat') }}"
+                                    class="rounded-md px-3 bg-gray-950/50 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">
+                                    Riwayat
+                                </a>
 
                             </div>
                         </div>

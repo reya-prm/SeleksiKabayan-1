@@ -34,11 +34,6 @@
                                     Dashboard
                                 </a>
 
-                                    <a href="{{ route('barang.kasir') }}"
-                                        class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
-                                        Kasir
-                                    </a>
-
 
                                 @if (auth()->user()->role == 'administrator')
                                     <a href="{{ route('barang.databarang') }}"
@@ -47,11 +42,15 @@
                                     </a>
                                 @endif
 
+                                <a href="{{ route('barang.kasir') }}"
+                                    class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+                                    Kasir
+                                </a>
 
-                                    <a href="{{ route('barang.riwayat') }}"
-                                        class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">
-                                        Riwayat
-                                    </a>
+                                <a href="{{ route('barang.riwayat') }}"
+                                    class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">
+                                    Riwayat
+                                </a>
 
                             </div>
                         </div>
@@ -103,116 +102,114 @@
             <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
                 {{-- isi konten --}}
-                    <main>
-                        <div class="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+                <main>
+                    <div class="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
 
-                            @if (session('success'))
-                                <div
-                                    class="bg-green-50 text-green-700 border border-green-200 rounded-base p-3 text-sm">
-                                    {{ session('success') }}
-                                </div>
-                            @endif
+                        @if (session('success'))
+                            <div class="bg-green-50 text-green-700 border border-green-200 rounded-base p-3 text-sm">
+                                {{ session('success') }}
+                            </div>
+                        @endif
 
-                            @if ($errors->any())
-                                <div class="bg-red-50 text-red-700 border border-red-200 rounded-base p-3 text-sm">
-                                    {{ $errors->first() }}
-                                </div>
-                            @endif
+                        @if ($errors->any())
+                            <div class="bg-red-50 text-red-700 border border-red-200 rounded-base p-3 text-sm">
+                                {{ $errors->first() }}
+                            </div>
+                        @endif
 
-                            {{-- form tambah barang --}}
-                            <form action="{{ route('barang.kasir.tambah') }}" method="POST"
-                                class="flex items-end gap-3">
-                                @csrf
+                        {{-- form tambah barang --}}
+                        <form action="{{ route('barang.kasir.tambah') }}" method="POST" class="flex items-end gap-3">
+                            @csrf
 
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium mb-1">Barang</label>
-                                    <select name="barang_id" class="w-full border rounded-lg px-3 py-2" required>
-                                        <option value="">- Pilih Barang -</option>
-                                        @foreach ($barang as $item)
-                                            <option value="{{ $item->id }}">
-                                                {{ $item->nama_barang }} —
-                                                Rp{{ number_format($item->harga_jual, 0, ',', '.') }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="w-28">
-                                    <label class="block text-sm font-medium mb-1">Qty</label>
-                                    <input type="number" name="qty" min="1" value="1"
-                                        class="w-full border rounded-lg px-3 py-2" required>
-                                </div>
-
-                                <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-lg">
-                                    Tambah
-                                </button>
-                            </form>
-
-                            {{-- keranjang --}}
-                            <div
-                                class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default">
-                                <table class="w-full text-sm text-left rtl:text-right text-body">
-                                    <thead
-                                        class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
-                                        <tr>
-                                            <th class="px-6 py-3 font-medium">Nama Barang</th>
-                                            <th class="px-6 py-3 font-medium">Qty</th>
-                                            <th class="px-6 py-3 font-medium">Subtotal</th>
-                                            <th class="px-6 py-3 font-medium">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @php $total = 0; @endphp
-                                        @forelse ($cart as $barangId => $qty)
-                                            @php
-                                                $barangItem = $barang->firstWhere('id', (int) $barangId);
-                                                $subtotal = $barangItem ? $barangItem->harga_jual * $qty : 0;
-                                                $total += $subtotal;
-                                            @endphp
-                                            <tr
-                                                class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                                                <td class="px-6 py-4">{{ $barangItem->nama_barang ?? '-' }}</td>
-                                                <td class="px-6 py-4">{{ $qty }}</td>
-                                                <td class="px-6 py-4">Rp{{ number_format($subtotal, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <form action="{{ route('barang.kasir.hapus', $barangId) }}"
-                                                        method="POST" class="inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                            class="text-red-600 hover:underline">Hapus</button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="4" class="px-6 py-4 text-center text-gray-400">
-                                                    Keranjang masih kosong.
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium mb-1">Barang</label>
+                                <select name="barang_id" class="w-full border rounded-lg px-3 py-2" required>
+                                    <option value="">- Pilih Barang -</option>
+                                    @foreach ($barang as $item)
+                                        <option value="{{ $item->id }}">
+                                            {{ $item->nama_barang }} —
+                                            Rp{{ number_format($item->harga_jual, 0, ',', '.') }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
 
-                            @if (!empty($cart))
-                                <div class="flex items-center justify-between">
-                                    <p class="font-semibold">
-                                        Total: Rp{{ number_format($total, 0, ',', '.') }}
-                                    </p>
+                            <div class="w-28">
+                                <label class="block text-sm font-medium mb-1">Qty</label>
+                                <input type="number" name="qty" min="1" value="1"
+                                    class="w-full border rounded-lg px-3 py-2" required>
+                            </div>
 
-                                    <form action="{{ route('barang.kasir.store') }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
-                                            Proses Transaksi
-                                        </button>
-                                    </form>
-                                </div>
-                            @endif
+                            <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-lg">
+                                Tambah
+                            </button>
+                        </form>
 
+                        {{-- keranjang --}}
+                        <div
+                            class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default">
+                            <table class="w-full text-sm text-left rtl:text-right text-body">
+                                <thead
+                                    class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
+                                    <tr>
+                                        <th class="px-6 py-3 font-medium">Nama Barang</th>
+                                        <th class="px-6 py-3 font-medium">Qty</th>
+                                        <th class="px-6 py-3 font-medium">Subtotal</th>
+                                        <th class="px-6 py-3 font-medium">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $total = 0; @endphp
+                                    @forelse ($cart as $barangId => $qty)
+                                        @php
+                                            $barangItem = $barang->firstWhere('id', (int) $barangId);
+                                            $subtotal = $barangItem ? $barangItem->harga_jual * $qty : 0;
+                                            $total += $subtotal;
+                                        @endphp
+                                        <tr
+                                            class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+                                            <td class="px-6 py-4">{{ $barangItem->nama_barang ?? '-' }}</td>
+                                            <td class="px-6 py-4">{{ $qty }}</td>
+                                            <td class="px-6 py-4">Rp{{ number_format($subtotal, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <form action="{{ route('barang.kasir.hapus', $barangId) }}"
+                                                    method="POST" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        class="text-red-600 hover:underline">Hapus</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="px-6 py-4 text-center text-gray-400">
+                                                Keranjang masih kosong.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
-                    </main>
+
+                        @if (!empty($cart))
+                            <div class="flex items-center justify-between">
+                                <p class="font-semibold">
+                                    Total: Rp{{ number_format($total, 0, ',', '.') }}
+                                </p>
+
+                                <form action="{{ route('barang.kasir.store') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
+                                        Proses Transaksi
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
+
+                    </div>
+                </main>
 
             </div>
 
