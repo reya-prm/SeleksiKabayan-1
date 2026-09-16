@@ -42,6 +42,13 @@
             <button type="submit" class="w-full bg-blue-600 text-white rounded-lg py-2 font-medium hover:bg-blue-700">
                 Masuk
             </button>
+
+            <!-- Tombol Kembali ke Menu Utama -->
+            <div class="mt-4 text-center">
+                <a href="{{ route('main') }}" class="text-sm text-gray-500 hover:text-blue-600 hover:underline inline-flex items-center gap-1">
+                    &larr; Kembali ke menu utama
+                </a>
+            </div>
         </form>
     </div>
 </body>
