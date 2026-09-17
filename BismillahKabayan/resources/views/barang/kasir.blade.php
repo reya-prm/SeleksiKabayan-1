@@ -21,9 +21,9 @@
 
                     <div class="flex items-center">
 
-                        <div class="shrink-0">
-                            <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-                                alt="Your Company" class="size-8" />
+                        <div class="text-left shrink-0">
+                            <h1 class="text-base font-bold text-white tracking-tight leading-none">PT Sinar Nusantara
+                            </h1>
                         </div>
 
                         <div class="hidden md:block">
