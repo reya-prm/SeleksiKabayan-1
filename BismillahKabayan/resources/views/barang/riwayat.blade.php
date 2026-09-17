@@ -1,133 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+@section('header_title', 'Riwayat Transaksi')
 
-    @vite('resources/css/app.css')
-
-    <title>Dashboard</title>
-</head>
-
-<body>
-    <div class="min-h-full">
-
-        <nav class="bg-gray-800">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
-                <div class="flex h-16 items-center justify-between">
-
-                    <div class="flex items-center">
-                        
-                        <div class="text-left shrink-0">
-                            <h1 class="text-base font-bold text-white tracking-tight leading-none">PT Sinar Nusantara
-                            </h1>
-                        </div>
-
-                        <div class="hidden md:block">
-                            <div class="ml-10 flex items-baseline space-x-4">
-
-                                <a href="{{ route('barang.dashboard') }}" aria-current="page"
-                                    class="rounded-md px-3 py-2 text-sm font-medium text-white">
-                                    Dashboard
-                                </a>
-
-                                @if (auth()->user()->role == 'administrator')
-                                    <a href="{{ route('barang.databarang') }}"
-                                        class="rounded-md  px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">
-                                        Data Barang
-                                    </a>
-                                @endif
-
-                                <a href="{{ route('barang.kasir') }}"
-                                    class="rounded-md  px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
-                                    Kasir
-                                </a>
-
-                                <a href="{{ route('barang.riwayat') }}"
-                                    class="rounded-md px-3 bg-gray-950/50 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">
-                                    Riwayat
-                                </a>
-
-                            </div>
-                        </div>
-
-                    </div>
-
-                    {{-- logout --}}
-                    <div class="flex items-center gap-4">
-
-                        <div class="text-sm text-white">
-                            Halo, {{ auth()->user()->name }}
-
-                            <span class="text-gray-400">
-                                ({{ auth()->user()->role }})
-                            </span>
-                        </div>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <button type="submit"
-                                class="rounded-md px-3 py-2 text-sm font-medium text-red-400 hover:bg-white/5 hover:text-red-300">
-                                Logout
-                            </button>
-                        </form>
-
-                    </div>
-
-                </div>
-
-            </div>
-        </nav>
-
-        <header
-            class="relative bg-gray-800 after:pointer-events-none after:absolute after:inset-x-0 after:inset-y-0 after:border-y after:border-white/10">
-
-            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-
-                <h1 class="text-3xl font-bold tracking-tight text-white">
-                    Riwayat
-                </h1>
-
-            </div>
-
-        </header>
-
-        <main>
-
-            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-
-                {{-- isi konten --}}
-                <table class="w-full text-sm text-left rtl:text-right text-body">
-                    <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 font-medium">Id Barang</th>
-                            <th scope="col" class="px-6 py-3 font-medium">Qty</th>
-                            <th scope="col" class="px-6 py-3 font-medium">Harga</th>
-                            <th scope="col" class="px-6 py-3 font-medium">SubTotal</th>
-                            <th scope="col" class="px-6 py-3 font-medium">Tanggal Pembelian</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($data as $item)
-                            <tr
-                                class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                                <td class="px-6 py-4">{{ $item->barang_id }}</td>
-                                <td class="px-6 py-4">{{ $item->qty }}</td>
-                                <td class="px-6 py-4">{{ $item->harga_jual_saat_transaksi }}</td>
-                                <td class="px-6 py-4">{{ $item->subtotal }}</td>
-                                <td class="px-6 py-4">{{ $item->created_at }}</td>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-        </main>
-
+@section('content')
+    <div class="relative overflow-x-auto bg-white shadow-sm rounded-lg border border-gray-200">
+        <table class="w-full text-sm text-left text-gray-700">
+            <thead class="text-xs uppercase bg-gray-50 border-b border-gray-200 text-gray-600">
+                <tr>
+                    <th scope="col" class="px-6 py-3 font-medium">Nama Barang</th>
+                    <th scope="col" class="px-6 py-3 font-medium">Qty</th>
+                    <th scope="col" class="px-6 py-3 font-medium">Harga Jual</th>
+                    <th scope="col" class="px-6 py-3 font-medium">SubTotal</th>
+                    <th scope="col" class="px-6 py-3 font-medium">Tanggal Pembelian</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($data as $item)
+                    <tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
+                        {{-- Mengambil nama barang dari relasi --}}
+                        <td class="px-6 py-4 font-medium text-gray-900">
+                            {{ $item->barang->nama_barang ?? 'Barang #' . $item->barang_id }}
+                        </td>
+                        <td class="px-6 py-4">{{ $item->qty }}</td>
+                        <td class="px-6 py-4">Rp {{ number_format($item->harga_jual_saat_transaksi, 0, ',', '.') }}</td>
+                        <td class="px-6 py-4 font-semibold text-gray-900">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                        <td class="px-6 py-4">{{ $item->created_at ? $item->created_at->format('d/m/Y H:i') : '-' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-400">Belum ada data riwayat transaksi.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
-</body>
-
-</html>
+@endsection

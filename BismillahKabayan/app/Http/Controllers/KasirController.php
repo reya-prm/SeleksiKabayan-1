@@ -86,7 +86,7 @@ class KasirController extends Controller
 
     public function riwayat()
     {   
-        $data = DetailPenjualan::all();
+        $data = DetailPenjualan::with('barang')->latest()->get();
         return view('barang.riwayat', compact('data'));
     }
 

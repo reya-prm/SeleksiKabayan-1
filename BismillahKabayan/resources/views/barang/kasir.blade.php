@@ -1,221 +1,127 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+@section('header_title', 'Kasir / Transaksi')
 
-    @vite('resources/css/app.css')
+@section('content')
+    {{-- Notifikasi Flash --}}
+    @if (session('success'))
+        <div class="bg-green-50 text-green-700 border border-green-200 rounded-lg p-4 text-sm font-medium mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
 
-    <title>Kasir</title>
-</head>
+    @if ($errors->any())
+        <div class="bg-red-50 text-red-700 border border-red-200 rounded-lg p-4 text-sm font-medium mb-4">
+            <ul class="list-disc list-inside text-sm">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-<body>
-    <div class="min-h-full">
-
-        <nav class="bg-gray-800">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
-                <div class="flex h-16 items-center justify-between">
-
-                    <div class="flex items-center">
-
-                        <div class="text-left shrink-0">
-                            <h1 class="text-base font-bold text-white tracking-tight leading-none">PT Sinar Nusantara
-                            </h1>
-                        </div>
-
-                        <div class="hidden md:block">
-                            <div class="ml-10 flex items-baseline space-x-4">
-
-                                <a href="{{ route('barang.dashboard') }}" aria-current="page"
-                                    class="rounded-md px-3 py-2 text-sm font-medium text-white">
-                                    Dashboard
-                                </a>
-
-
-                                @if (auth()->user()->role == 'administrator')
-                                    <a href="{{ route('barang.databarang') }}"
-                                        class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">
-                                        Data Barang
-                                    </a>
-                                @endif
-
-                                <a href="{{ route('barang.kasir') }}"
-                                    class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
-                                    Kasir
-                                </a>
-
-                                <a href="{{ route('barang.riwayat') }}"
-                                    class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">
-                                    Riwayat
-                                </a>
-
-                            </div>
-                        </div>
-
-                    </div>
-
-                    {{-- logout --}}
-                    <div class="flex items-center gap-4">
-
-                        <div class="text-sm text-white">
-                            Halo, {{ auth()->user()->name }}
-
-                            <span class="text-gray-400">
-                                ({{ auth()->user()->role }})
-                            </span>
-                        </div>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <button type="submit"
-                                class="rounded-md px-3 py-2 text-sm font-medium text-red-400 hover:bg-white/5 hover:text-red-300">
-                                Logout
-                            </button>
-                        </form>
-
-                    </div>
-
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Form Tambah Item ke Keranjang -->
+        <div class="lg:col-span-1 bg-white p-6 rounded-lg border border-gray-200 shadow-sm h-fit">
+            <h2 class="text-lg font-semibold mb-4 text-gray-800">Pilih Barang</h2>
+            <form action="{{ route('barang.kasir.tambah') }}" method="POST" class="space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Barang</label>
+                    <select name="barang_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                        <option value="">-- Pilih Barang --</option>
+                        @foreach ($barang as $item)
+                            <option value="{{ $item->id }}">
+                                {{ $item->nama_barang }} — Rp {{ number_format($item->harga_jual, 0, ',', '.') }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah (Qty)</label>
+                    <input type="number" name="qty" min="1" value="1" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition">
+                    + Tambah ke Keranjang
+                </button>
+            </form>
+        </div>
+
+        <!-- Tabel Keranjang Belanja -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-lg border border-gray-200 shadow-sm space-y-6">
+            <h2 class="text-lg font-semibold text-gray-800">Keranjang Belanja</h2>
+
+            @php
+                // Index koleksi barang berdasarkan ID untuk kemudahan pencarian di view
+                $barangKeyed = $barang->keyBy('id');
+                $grandTotal = 0;
+            @endphp
+
+            <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                <table class="w-full text-sm text-left text-gray-700">
+                    <thead class="text-xs uppercase bg-gray-50 border-b border-gray-200 text-gray-600">
+                        <tr>
+                            <th class="px-4 py-3 font-medium">Barang</th>
+                            <th class="px-4 py-3 font-medium">Harga</th>
+                            <th class="px-4 py-3 font-medium">Qty</th>
+                            <th class="px-4 py-3 font-medium">Subtotal</th>
+                            <th class="px-4 py-3 font-medium text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($cart as $barangId => $qty)
+                            @php
+                                $item = $barangKeyed->get($barangId);
+                            @endphp
+
+                            @if ($item)
+                                @php
+                                    $subtotal = $item->harga_jual * $qty;
+                                    $grandTotal += $subtotal;
+                                @endphp
+                                <tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-medium text-gray-900">{{ $item->nama_barang }}</td>
+                                    <td class="px-4 py-3">Rp {{ number_format($item->harga_jual, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3">{{ $qty }}</td>
+                                    <td class="px-4 py-3 font-medium text-gray-900">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <form action="{{ route('barang.kasir.hapus', $barangId) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:underline">Hapus</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endif
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-4 py-6 text-center text-gray-400">
+                                    Keranjang masih kosong.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
-        </nav>
 
-        <header
-            class="relative bg-gray-800 after:pointer-events-none after:absolute after:inset-x-0 after:inset-y-0 after:border-y after:border-white/10">
-
-            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-
-                <h1 class="text-3xl font-bold tracking-tight text-white">
-                    Dashboard
-                </h1>
-
-            </div>
-
-        </header>
-
-        <main>
-
-            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-
-                {{-- isi konten --}}
-                <main>
-                    <div class="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
-
-                        @if (session('success'))
-                            <div class="bg-green-50 text-green-700 border border-green-200 rounded-base p-3 text-sm">
-                                {{ session('success') }}
-                            </div>
-                        @endif
-
-                        @if ($errors->any())
-                            <div class="bg-red-50 text-red-700 border border-red-200 rounded-base p-3 text-sm">
-                                {{ $errors->first() }}
-                            </div>
-                        @endif
-
-                        {{-- form tambah barang --}}
-                        <form action="{{ route('barang.kasir.tambah') }}" method="POST" class="flex items-end gap-3">
-                            @csrf
-
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium mb-1">Barang</label>
-                                <select name="barang_id" class="w-full border rounded-lg px-3 py-2" required>
-                                    <option value="">- Pilih Barang -</option>
-                                    @foreach ($barang as $item)
-                                        <option value="{{ $item->id }}">
-                                            {{ $item->nama_barang }} —
-                                            Rp{{ number_format($item->harga_jual, 0, ',', '.') }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="w-28">
-                                <label class="block text-sm font-medium mb-1">Qty</label>
-                                <input type="number" name="qty" min="1" value="1"
-                                    class="w-full border rounded-lg px-3 py-2" required>
-                            </div>
-
-                            <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-lg">
-                                Tambah
-                            </button>
-                        </form>
-
-                        {{-- keranjang --}}
-                        <div
-                            class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default">
-                            <table class="w-full text-sm text-left rtl:text-right text-body">
-                                <thead
-                                    class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
-                                    <tr>
-                                        <th class="px-6 py-3 font-medium">Nama Barang</th>
-                                        <th class="px-6 py-3 font-medium">Qty</th>
-                                        <th class="px-6 py-3 font-medium">Subtotal</th>
-                                        <th class="px-6 py-3 font-medium">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @php $total = 0; @endphp
-                                    @forelse ($cart as $barangId => $qty)
-                                        @php
-                                            $barangItem = $barang->firstWhere('id', (int) $barangId);
-                                            $subtotal = $barangItem ? $barangItem->harga_jual * $qty : 0;
-                                            $total += $subtotal;
-                                        @endphp
-                                        <tr
-                                            class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                                            <td class="px-6 py-4">{{ $barangItem->nama_barang ?? '-' }}</td>
-                                            <td class="px-6 py-4">{{ $qty }}</td>
-                                            <td class="px-6 py-4">Rp{{ number_format($subtotal, 0, ',', '.') }}
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <form action="{{ route('barang.kasir.hapus', $barangId) }}"
-                                                    method="POST" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                        class="text-red-600 hover:underline">Hapus</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="px-6 py-4 text-center text-gray-400">
-                                                Keranjang masih kosong.
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-
-                        @if (!empty($cart))
-                            <div class="flex items-center justify-between">
-                                <p class="font-semibold">
-                                    Total: Rp{{ number_format($total, 0, ',', '.') }}
-                                </p>
-
-                                <form action="{{ route('barang.kasir.store') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
-                                        Proses Transaksi
-                                    </button>
-                                </form>
-                            </div>
-                        @endif
-
+            <!-- Total dan Selesaikan Transaksi -->
+            @if (!empty($cart))
+                <div class="border-t border-gray-200 pt-4 space-y-4">
+                    <div class="flex justify-between items-center text-lg font-bold">
+                        <span class="text-gray-800">Total Transaksi</span>
+                        <span class="text-green-600">Rp {{ number_format($grandTotal, 0, ',', '.') }}</span>
                     </div>
-                </main>
 
-            </div>
-
-        </main>
-
+                    <form action="{{ route('barang.kasir.store') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full bg-green-600 text-white font-medium py-2.5 rounded-lg hover:bg-green-700 transition">
+                            Proses & Simpan Transaksi
+                        </button>
+                    </form>
+                </div>
+            @endif
+        </div>
     </div>
-</body>
-
-</html>
+@endsection
