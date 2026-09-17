@@ -11,7 +11,7 @@ class AuthController extends Controller
 
     public function main()
     {
-        return view('index');
+        return view('home');
     }
 
     public function showLoginForm()
