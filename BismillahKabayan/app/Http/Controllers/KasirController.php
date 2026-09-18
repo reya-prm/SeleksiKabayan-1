@@ -114,7 +114,6 @@ class KasirController extends Controller
             session()->forget('kasir_cart');
 
             return redirect()->route('barang.kasir')->with('success', 'Transaksi berhasil disimpan!');
-
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -122,8 +121,44 @@ class KasirController extends Controller
 
     public function riwayat()
     {
-        $data = DetailPenjualan::with('barang')->latest()->get();
+        $data = Penjualan::with(['detail.barang', 'gudang', 'user'])->latest()->get();
 
         return view('barang.riwayat', compact('data'));
+    }
+
+    public function batalkan(string $id)
+    {
+        $penjualan = Penjualan::with('detail')->findOrFail($id);
+
+        // Cek jika gudang_id tidak valid/kosong
+        if (!$penjualan->gudang_id) {
+            return back()->with('error', 'Gagal membatalkan: Transaksi ini tidak terikat dengan gudang manapun.');
+        }
+
+        if ($penjualan->status === 'dibatalkan') {
+            return back()->with('error', 'Transaksi ini sudah dibatalkan sebelumnya.');
+        }
+
+        DB::transaction(function () use ($penjualan) {
+            foreach ($penjualan->detail as $item) {
+                $stok = StokBarang::where('gudang_id', $penjualan->gudang_id)
+                    ->where('barang_id', $item->barang_id)
+                    ->first();
+
+                if ($stok) {
+                    $stok->increment('qty', $item->qty);
+                } else {
+                    StokBarang::create([
+                        'gudang_id' => $penjualan->gudang_id,
+                        'barang_id' => $item->barang_id,
+                        'qty'       => $item->qty,
+                    ]);
+                }
+            }
+
+            $penjualan->update(['status' => 'dibatalkan']);
+        });
+
+        return back()->with('success', 'Transaksi berhasil dibatalkan, stok sudah dikembalikan.');
     }
 }

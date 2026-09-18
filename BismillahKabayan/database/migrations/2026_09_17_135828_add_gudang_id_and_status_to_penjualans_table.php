@@ -9,18 +9,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('penjualans', function (Blueprint $table) {
-            //dijual dari gudang mana, biar tau stok mana yang harus dikurangin
-            $table->foreignId('gudang_id')->after('id')->constrained('gudangs')->restrictOnDelete();
-            //buat fitur Pembatalan nanti: 'selesai' = transaksi normal, 'dibatalkan' = dibatalkan tapi datanya tetap ada
-            $table->enum('status', ['selesai', 'dibatalkan'])->default('selesai')->after('total_harga');
+            if (!Schema::hasColumn('penjualans', 'gudang_id')) {
+                $table->foreignId('gudang_id')->after('id')->constrained('gudangs')->restrictOnDelete();
+            }
+
+            if (!Schema::hasColumn('penjualans', 'status')) {
+                $table->enum('status', ['selesai', 'dibatalkan'])->default('selesai')->after('total_harga');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('penjualans', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('gudang_id');
-            $table->dropColumn('status');
+            if (Schema::hasColumn('penjualans', 'gudang_id')) {
+                $table->dropConstrainedForeignId('gudang_id');
+            }
+            if (Schema::hasColumn('penjualans', 'status')) {
+                $table->dropColumn('status');
+            }
         });
     }
 };

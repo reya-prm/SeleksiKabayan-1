@@ -54,6 +54,7 @@ Route::middleware('auth')->group(function () {
 
         // Riwayat Transaksi
         Route::get('/riwayat', [KasirController::class, 'riwayat'])->name('barang.riwayat');
+        Route::patch('/riwayat/{id}/batalkan', [KasirController::class, 'batalkan'])->name('barang.riwayat.batalkan');
 
         // Barang Masuk
         Route::get('/barang-masuk', [BarangMasukController::class, 'index'])->name('barang-masuk.index');
