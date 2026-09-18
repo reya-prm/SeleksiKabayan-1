@@ -74,3 +74,4 @@
             </div>
         @endforelse
     </div>
+@endsection
