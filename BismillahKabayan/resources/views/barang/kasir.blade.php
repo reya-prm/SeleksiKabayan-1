@@ -42,7 +42,8 @@
                         @foreach ($barang as $item)
                             <option value="{{ $item->id }}">
                                 {{-- DITAMBAHKAN: Menampilkan sisa total stok --}}
-                                {{ $item->nama_barang }} — Rp {{ number_format($item->harga_jual, 0, ',', '.') }} (Stok: {{ $item->total_stok ?? 0 }})
+                                {{ $item->nama_barang }} — Rp {{ number_format($item->harga_jual, 0, ',', '.') }} (Stok:
+                                {{ $item->total_stok ?? 0 }})
                             </option>
                         @endforeach
                     </select>
@@ -101,7 +102,8 @@
                                         Rp {{ number_format($subtotal, 0, ',', '.') }}
                                     </td>
                                     <td class="px-4 py-3 text-center">
-                                        <form action="{{ route('barang.kasir.hapus', $barangId) }}" method="POST" class="inline">
+                                        <form action="{{ route('barang.kasir.hapus', $barangId) }}" method="POST"
+                                            class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:underline">Hapus</button>
@@ -132,7 +134,8 @@
                         @csrf
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Gudang Asal Barang</label>
-                            <select name="gudang_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
+                            <select name="gudang_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                                required>
                                 <option value="">-- Pilih Gudang --</option>
                                 @foreach ($gudangs as $g)
                                     <option value="{{ $g->id }}">{{ $g->nama_gudang }}</option>
@@ -140,7 +143,23 @@
                             </select>
                         </div>
 
-                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">
+                        {{-- pelanggan  --}}
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="pelanggan_id">Pelanggan</label>
+
+                            <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" name="pelanggan_id" id="pelanggan_id">
+                                <option value="">-- Umum --</option>
+
+                                @foreach ($pelanggans as $pelanggan)
+                                    <option value="{{ $pelanggan->id }}">
+                                        {{ $pelanggan->nama }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">
                             Selesaikan Transaksi
                         </button>
                     </form>

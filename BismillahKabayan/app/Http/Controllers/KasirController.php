@@ -6,6 +6,7 @@ use App\Models\Barang;
 use App\Models\DetailPenjualan;
 use App\Models\Gudang;
 use App\Models\Penjualan;
+use App\Models\Pelanggan;
 use App\Models\StokBarang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,9 +21,10 @@ class KasirController extends Controller
             ->get();
 
         $gudangs = Gudang::all();
+        $pelanggans = Pelanggan::all();
         $cart = session('kasir_cart', []);
 
-        return view('barang.kasir', compact('barang', 'gudangs', 'cart'));
+        return view('barang.kasir', compact('barang', 'gudangs', 'pelanggans', 'cart'));
     }
 
     public function tambah(Request $request)
@@ -59,20 +61,21 @@ class KasirController extends Controller
         if (empty($cart)) {
             return back()->with('error', 'Belum ada barang di dalam keranjang.');
         }
-
+        
         $validated = $request->validate([
-            'gudang_id' => 'required|exists:gudangs,id',
+            'gudang_id'    => 'required|exists:gudangs,id',
+            'pelanggan_id' => 'nullable|exists:pelanggans,id',
         ]);
 
         try {
             DB::transaction(function () use ($cart, $validated) {
                 $total = 0;
 
-                // 1. Buat Header Transaksi (menggunakan nama kolom 'total_harga')
                 $penjualan = Penjualan::create([
-                    'gudang_id'   => $validated['gudang_id'],
-                    'user_id'     => auth()->id(),
-                    'total_harga' => 0,
+                    'gudang_id'    => $validated['gudang_id'],
+                    'pelanggan_id' => $validated['pelanggan_id'] ?? null,
+                    'user_id'      => auth()->id(),
+                    'total_harga'  => 0,
                 ]);
 
                 // Loop session cart [barang_id => qty]
@@ -80,8 +83,10 @@ class KasirController extends Controller
                     $barang = Barang::findOrFail($barangId);
 
                     // Cek Stok Barang di Gudang yang Dipilih
+                    // lockForUpdate() mencegah race condition (stok negatif saat ada transaksi bersamaan)
                     $stok = StokBarang::where('gudang_id', $validated['gudang_id'])
                         ->where('barang_id', $barang->id)
+                        ->lockForUpdate()
                         ->first();
 
                     $tersedia = $stok?->qty ?? 0;
@@ -97,7 +102,7 @@ class KasirController extends Controller
                     $subtotal = $barang->harga_jual * $qty;
                     $total += $subtotal;
 
-                    // Simpan Detail Penjualan
+                    // Simpan Detail Penjualan (snapshot harga saat transaksi)
                     $penjualan->detail()->create([
                         'barang_id'                 => $barang->id,
                         'qty'                       => $qty,

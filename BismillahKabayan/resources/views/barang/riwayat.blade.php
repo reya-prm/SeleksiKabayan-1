@@ -20,6 +20,7 @@
                             #{{ $penjualan->id }} — {{ $penjualan->created_at->format('d/m/Y H:i') }}
                             — Gudang: {{ $penjualan->gudang->nama_gudang ?? '-' }}
                             — Kasir: {{ $penjualan->user->name ?? '-' }}
+                            — Pelanggan: {{ $penjualan->pelanggan->nama ?? '-' }}
                         </p>
                         <p class="font-semibold text-gray-900">
                             Total: Rp {{ number_format($penjualan->total_harga, 0, ',', '.') }}
@@ -73,4 +74,3 @@
             </div>
         @endforelse
     </div>
-@endsection
