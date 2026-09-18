@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Barang;
 use App\Models\DetailPenjualan;
+use App\Models\Gudang;
 use App\Models\Penjualan;
+use App\Models\StokBarang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -12,10 +14,15 @@ class KasirController extends Controller
 {
     public function index()
     {
-        $barang = Barang::where('status_aktif', true)->get();
+        // 1. Mengambil barang aktif sekaligus menghitung total stok dari relasi stokBarang
+        $barang = Barang::where('status_aktif', true)
+            ->withSum('stokBarang as total_stok', 'qty')
+            ->get();
+
+        $gudangs = Gudang::all();
         $cart = session('kasir_cart', []);
 
-        return view('barang.kasir', compact('barang', 'cart'));
+        return view('barang.kasir', compact('barang', 'gudangs', 'cart'));
     }
 
     public function tambah(Request $request)
@@ -28,7 +35,7 @@ class KasirController extends Controller
         $cart = session('kasir_cart', []);
         $barangId = $validated['barang_id'];
 
-        // kalau barang yang sama ditambahin lagi, qty-nya numpuk
+        // Mengisi session cart dengan format [barang_id => jumlah_qty]
         $cart[$barangId] = ($cart[$barangId] ?? 0) + $validated['qty'];
 
         session(['kasir_cart' => $cart]);
@@ -50,44 +57,73 @@ class KasirController extends Controller
         $cart = session('kasir_cart', []);
 
         if (empty($cart)) {
-            return back()->withErrors(['cart' => 'Keranjang masih kosong.']);
+            return back()->with('error', 'Belum ada barang di dalam keranjang.');
         }
 
-        DB::transaction(function () use ($cart) {
-            $total = 0;
-            $detailData = [];
+        $validated = $request->validate([
+            'gudang_id' => 'required|exists:gudangs,id',
+        ]);
 
-            foreach ($cart as $barangId => $qty) {
-                $barang = Barang::findOrFail($barangId);
-                $subtotal = $barang->harga_jual * $qty;
-                $total += $subtotal;
+        try {
+            DB::transaction(function () use ($cart, $validated) {
+                $total = 0;
 
-                $detailData[] = [
-                    'barang_id'                 => $barang->id,
-                    'qty'                       => $qty,
-                    'harga_jual_saat_transaksi' => $barang->harga_jual,
-                    'subtotal'                  => $subtotal,
-                ];
-            }
+                // 1. Buat Header Transaksi (menggunakan nama kolom 'total_harga')
+                $penjualan = Penjualan::create([
+                    'gudang_id'   => $validated['gudang_id'],
+                    'user_id'     => auth()->id(),
+                    'total_harga' => 0,
+                ]);
 
-            $penjualan = Penjualan::create([
-                'pelanggan_id' => null,
-                'user_id'      => auth()->id(),
-                'total_harga'  => $total,
-            ]);
+                // Loop session cart [barang_id => qty]
+                foreach ($cart as $barangId => $qty) {
+                    $barang = Barang::findOrFail($barangId);
 
-            $penjualan->detail()->createMany($detailData);
-        });
+                    // Cek Stok Barang di Gudang yang Dipilih
+                    $stok = StokBarang::where('gudang_id', $validated['gudang_id'])
+                        ->where('barang_id', $barang->id)
+                        ->first();
 
-        session()->forget('kasir_cart');
+                    $tersedia = $stok?->qty ?? 0;
 
-        return redirect()->route('barang.kasir')->with('success', 'Transaksi berhasil disimpan.');
+                    // Jika stok kosong atau kurang dari yang diminta
+                    if (!$stok || $stok->qty < $qty) {
+                        throw new \Exception("Stok {$barang->nama_barang} di gudang ini tidak mencukupi (tersedia: {$tersedia}, diminta: {$qty}).");
+                    }
+
+                    // Kurangi Stok
+                    $stok->decrement('qty', $qty);
+
+                    $subtotal = $barang->harga_jual * $qty;
+                    $total += $subtotal;
+
+                    // Simpan Detail Penjualan
+                    $penjualan->detail()->create([
+                        'barang_id'                 => $barang->id,
+                        'qty'                       => $qty,
+                        'harga_jual_saat_transaksi' => $barang->harga_jual,
+                        'subtotal'                  => $subtotal,
+                    ]);
+                }
+
+                // Update Total Harga Transaksi
+                $penjualan->update(['total_harga' => $total]);
+            });
+
+            // Hapus Keranjang Setelah Transaksi Berhasil
+            session()->forget('kasir_cart');
+
+            return redirect()->route('barang.kasir')->with('success', 'Transaksi berhasil disimpan!');
+
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 
     public function riwayat()
-    {   
+    {
         $data = DetailPenjualan::with('barang')->latest()->get();
+
         return view('barang.riwayat', compact('data'));
     }
-
 }

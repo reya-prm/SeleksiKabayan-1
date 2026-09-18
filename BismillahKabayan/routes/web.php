@@ -5,6 +5,7 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\KasirController;
 use App\Http\Controllers\GudangController;
 use App\Http\Controllers\BarangMasukController;
+use App\Http\Controllers\PelangganController;
 use Illuminate\Support\Facades\Route;
 
 // --- ROUTE PUBLIK ---
@@ -34,6 +35,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/gudang/{id}/edit', [GudangController::class, 'edit'])->name('gudang.edit');
         Route::put('/gudang/{id}', [GudangController::class, 'update'])->name('gudang.update');
         Route::delete('/gudang/{id}', [GudangController::class, 'destroy'])->name('gudang.destroy');
+
+        //Pelanggan
+        Route::get('/pelanggan', [PelangganController::class, 'index'])->name('pelanggan.index');
+        Route::post('/pelanggan', [PelangganController::class, 'store'])->name('pelanggan.store');
+        Route::get('/pelanggan/{id}/edit', [PelangganController::class, 'edit'])->name('pelanggan.edit');
+        Route::put('/pelanggan/{id}', [PelangganController::class, 'update'])->name('pelanggan.update');
+        Route::delete('/pelanggan/{id}', [PelangganController::class, 'destroy'])->name('pelanggan.destroy');
     });
 
     // DIAKSES BERSAMA (ADMINISTRATOR & OPERATOR)
@@ -53,5 +61,4 @@ Route::middleware('auth')->group(function () {
         Route::delete('/barang-masuk/hapus/{barangId}', [BarangMasukController::class, 'hapusItem'])->name('barang-masuk.hapus');
         Route::post('/barang-masuk', [BarangMasukController::class, 'store'])->name('barang-masuk.store');
     });
-
 });

@@ -9,13 +9,12 @@ use App\Models\StokBarang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-
 class BarangMasukController extends Controller
 {
     public function index()
     {
         $gudangs = Gudang::all();
-        $barans = Barang::where('status_aktif', true)->get();
+        $barangs = Barang::where('status_aktif', true)->get();
         $cart = session('barang_masuk_cart', []);
 
         return view('barang-masuk.index', compact('gudangs', 'barangs', 'cart'));
@@ -24,7 +23,7 @@ class BarangMasukController extends Controller
     public function tambah(Request $request)
     {
         $validated = $request->validate([
-            'barang_id' => 'required|exists:barang,id',
+            'barang_id' => 'required|exists:barangs,id',
             'qty' => 'required|integer|min:1',
             'harga_beli' => 'required|integer|min:0',
         ]);
@@ -40,7 +39,7 @@ class BarangMasukController extends Controller
 
         session(['barang_masuk_cart' => $cart]);
 
-        return back()->with('success', $barang->nama_barang . 'ditambahkan ke daftar.');
+        return back()->with('success', $barang->nama_barang . ' ditambahkan ke daftar.');
     }
 
     public function hapusItem($barangId)
@@ -61,39 +60,36 @@ class BarangMasukController extends Controller
         }
 
         $validated = $request->validate([
-            'gudang_id' => 'required|exists:gudangs, id',
+            'gudang_id' => 'required|exists:gudangs,id',
             'keterangan' => 'nullable|string|max:225',
         ]);
 
-        DB::transaction(function () use ($cart, $validated){
+        DB::transaction(function () use ($cart, $validated) {
             $barangMasuk = BarangMasuk::create([
                 'gudang_id' => $validated['gudang_id'],
-            'user_id' => auth()->id(),
-            'keterangan' => $validated['keterangan'] ?? null,
+                'user_id' => auth()->id(),
+                'keterangan' => $validated['keterangan'] ?? null,
             ]);
 
-        foreach ($cart as $barangId => $item) {
+            foreach ($cart as $barangId => $item) {
 
-        $barangMasuk->detail()->create([
-            'barang_id' => $barangId,
-            'qty' => $item['qty'],
-            'harga_beli' => $item['harga_beli'],
-        ]);
+                $barangMasuk->detail()->create([
+                    'barang_id' => $barangId,
+                    'qty' => $item['qty'],
+                    'harga_beli' => $item['harga_beli'],
+                ]);
 
-        $stok = StokBarang::firstOrCreate(
-            ['gudang_id' => $validated['gudang_id'], 'barang_id' => $barangId],
-            ['qty' => 0]
-        );
+                $stok = StokBarang::firstOrCreate(
+                    ['gudang_id' => $validated['gudang_id'], 'barang_id' => $barangId],
+                    ['qty' => 0]
+                );
 
-        $stok->increment('qty', $item['qty']);
-        }
-
+                $stok->increment('qty', $item['qty']);
+            }
         });
 
         session()->forget('barang_masuk_cart');
 
-        return redirect()->route('barang-masuk.index')->with('succes', 'Transaksi barang masuk berhasil disimpan.');
+        return redirect()->route('barang-masuk.index')->with('success', 'Transaksi barang masuk berhasil disimpan.');
     }
 }
-
-

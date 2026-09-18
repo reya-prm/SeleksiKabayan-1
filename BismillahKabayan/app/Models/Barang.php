@@ -18,4 +18,8 @@ class Barang extends Model
         'status_aktif',
     ];
 
+    public function stokBarang()
+    {
+        return $this->hasMany(StokBarang::class, 'barang_id');
+    }
 }

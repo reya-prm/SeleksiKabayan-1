@@ -3,10 +3,17 @@
 @section('header_title', 'Kasir / Transaksi')
 
 @section('content')
-    {{-- Notifikasi Flash --}}
+    {{-- Notifikasi Flash Sukses --}}
     @if (session('success'))
         <div class="bg-green-50 text-green-700 border border-green-200 rounded-lg p-4 text-sm font-medium mb-4">
             {{ session('success') }}
+        </div>
+    @endif
+
+    {{-- DITAMBAHKAN: Notifikasi Flash Error (Menangkap pesan stok kurang / gagal) --}}
+    @if (session('error'))
+        <div class="bg-red-50 text-red-700 border border-red-200 rounded-lg p-4 text-sm font-medium mb-4">
+            {{ session('error') }}
         </div>
     @endif
 
@@ -28,11 +35,14 @@
                 @csrf
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Barang</label>
-                    <select name="barang_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                    <select name="barang_id"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        required>
                         <option value="">-- Pilih Barang --</option>
                         @foreach ($barang as $item)
                             <option value="{{ $item->id }}">
-                                {{ $item->nama_barang }} — Rp {{ number_format($item->harga_jual, 0, ',', '.') }}
+                                {{-- DITAMBAHKAN: Menampilkan sisa total stok --}}
+                                {{ $item->nama_barang }} — Rp {{ number_format($item->harga_jual, 0, ',', '.') }} (Stok: {{ $item->total_stok ?? 0 }})
                             </option>
                         @endforeach
                     </select>
@@ -40,10 +50,13 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah (Qty)</label>
-                    <input type="number" name="qty" min="1" value="1" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                    <input type="number" name="qty" min="1" value="1"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        required>
                 </div>
 
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition">
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition">
                     + Tambah ke Keranjang
                 </button>
             </form>
@@ -54,7 +67,6 @@
             <h2 class="text-lg font-semibold text-gray-800">Keranjang Belanja</h2>
 
             @php
-                // Index koleksi barang berdasarkan ID untuk kemudahan pencarian di view
                 $barangKeyed = $barang->keyBy('id');
                 $grandTotal = 0;
             @endphp
@@ -85,7 +97,9 @@
                                     <td class="px-4 py-3 font-medium text-gray-900">{{ $item->nama_barang }}</td>
                                     <td class="px-4 py-3">Rp {{ number_format($item->harga_jual, 0, ',', '.') }}</td>
                                     <td class="px-4 py-3">{{ $qty }}</td>
-                                    <td class="px-4 py-3 font-medium text-gray-900">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 font-medium text-gray-900">
+                                        Rp {{ number_format($subtotal, 0, ',', '.') }}
+                                    </td>
                                     <td class="px-4 py-3 text-center">
                                         <form action="{{ route('barang.kasir.hapus', $barangId) }}" method="POST" class="inline">
                                             @csrf
@@ -116,8 +130,18 @@
 
                     <form action="{{ route('barang.kasir.store') }}" method="POST">
                         @csrf
-                        <button type="submit" class="w-full bg-green-600 text-white font-medium py-2.5 rounded-lg hover:bg-green-700 transition">
-                            Proses & Simpan Transaksi
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Gudang Asal Barang</label>
+                            <select name="gudang_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" required>
+                                <option value="">-- Pilih Gudang --</option>
+                                @foreach ($gudangs as $g)
+                                    <option value="{{ $g->id }}">{{ $g->nama_gudang }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium">
+                            Selesaikan Transaksi
                         </button>
                     </form>
                 </div>

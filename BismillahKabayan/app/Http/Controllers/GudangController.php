@@ -16,7 +16,7 @@ class GudangController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->vaidate([
+        $validated = $request->validate([
             'nama_gudang' => 'required|string|max:225',
             'alamat' => 'nullable|string|max:255',
         ]);
@@ -29,11 +29,11 @@ class GudangController extends Controller
     {
         $gudangs = Gudang::all();
         $gudangDetail = Gudang::findOrFail($id);
-        
+
         return view('gudang.index', compact('gudangs', 'gudangDetail'));
     }
 
-    public function update (Request $request, string $id)
+    public function update(Request $request, string $id)
     {
         $validated = $request->validate([
             'nama_gudang' => 'required|string|max:225',
@@ -49,12 +49,12 @@ class GudangController extends Controller
     {
         $gudang = Gudang::findOrFail($id);
 
-        if($gudang->stokBarangs()->where('qty', '>', 0)->exists()) {
-            return back()->with('eror', 'Gudang ini masih punya stok barang, tidak bisa dihapus.');
+        if ($gudang->stokBarangs()->where('qty', '>', 0)->exists()) {
+            return back()->with('error', 'Gudang ini masih punya stok barang, tidak bisa dihapus.');
         }
 
         $gudang->delete();
 
-        return redirect()->route('gudang.index')->with('succes', 'Gudang berhasil dihapus.');
+        return redirect()->route('gudang.index')->with('success', 'Gudang berhasil dihapus.');
     }
 }

@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class BarangMasuk extends Model
 {
-    protected $fillabe = ['gudang_id', 'user_id', 'keterangan'];
+    protected $fillable = [
+        'gudang_id',
+        'user_id',
+        'keterangan',
+    ];
 
     public function detail()
     {
