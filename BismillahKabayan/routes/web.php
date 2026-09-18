@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\KasirController;
 use App\Http\Controllers\GudangController;
+use App\Http\Controllers\TransferGudangController;
 use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\PelangganController;
 use Illuminate\Support\Facades\Route;
@@ -61,5 +62,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/barang-masuk/tambah', [BarangMasukController::class, 'tambah'])->name('barang-masuk.tambah');
         Route::delete('/barang-masuk/hapus/{barangId}', [BarangMasukController::class, 'hapusItem'])->name('barang-masuk.hapus');
         Route::post('/barang-masuk', [BarangMasukController::class, 'store'])->name('barang-masuk.store');
+
+        //Transfer Gudang
+        Route::get('/transfer-gudang', [TransferGudangController::class, 'index'])->name('transfer-gudang.index');
+        Route::post('/transfer-gudang/tambah', [TransferGudangController::class, 'tambah'])->name('transfer-gudang.tambah');
+        Route::delete('/transfer-gudang/hapus/{barangId}', [TransferGudangController::class, 'hapusItem'])->name('transfer-gudang.hapus');
+        Route::post('/transfer-gudang', [TransferGudangController::class, 'store'])->name('transfer-gudang.store');
     });
 });

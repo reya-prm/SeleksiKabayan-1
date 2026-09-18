@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Gudang;
+use App\Models\Pelanggan;
+use App\Models\Penjualan;
+use App\Models\StokBarang;
 use App\Models\Barang;
 use Illuminate\Http\Request;
 
@@ -9,9 +13,26 @@ class BarangController extends Controller
 {
     public function dashboard()
     {
-        $barang = Barang::all();
+        $totalBarang = Barang::count();
+        $totalGudang = Gudang::count();
+        $totalPelanggan = Pelanggan::count();
+        $totalPenjualanHariIni = Penjualan::whereDate('created_at', today())
+            ->where('status', 'selesai')
+            ->sum('total_harga');
 
-        return view('barang.dashboard', compact('barang'));
+        // Stok terendah
+        $stokTerendah = StokBarang::with('barang', 'gudang')
+            ->orderBy('qty')
+            ->take(5)
+            ->get();
+
+        return view('barang.dashboard', compact(
+            'totalBarang',
+            'totalGudang',
+            'totalPelanggan',
+            'totalPenjualanHariIni',
+            'stokTerendah'
+        ));
     }
 
     public function databarang()
@@ -92,5 +113,4 @@ class BarangController extends Controller
 
         return redirect()->route('barang.databarang')->with('success', 'Barang berhasil dihapus.');
     }
-
 }

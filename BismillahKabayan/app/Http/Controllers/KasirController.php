@@ -15,7 +15,7 @@ class KasirController extends Controller
 {
     public function index()
     {
-        // 1. Mengambil barang aktif sekaligus menghitung total stok dari relasi stokBarang
+        // ambil barang aktif sekaligus  total stok dari relasi stokBarang
         $barang = Barang::where('status_aktif', true)
             ->withSum('stokBarang as total_stok', 'qty')
             ->get();
@@ -61,7 +61,7 @@ class KasirController extends Controller
         if (empty($cart)) {
             return back()->with('error', 'Belum ada barang di dalam keranjang.');
         }
-        
+
         $validated = $request->validate([
             'gudang_id'    => 'required|exists:gudangs,id',
             'pelanggan_id' => 'nullable|exists:pelanggans,id',

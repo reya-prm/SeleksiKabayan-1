@@ -12,4 +12,19 @@ class Gudang extends Model
     {
         return $this->hasMany(StokBarang::class);
     }
+
+    public function penjualans()
+    {
+        return $this->hasMany(Penjualan::class);
+    }
+
+    public function transferKeluar()
+    {
+        return $this->hasMany(TransferGudang::class, 'gudang_asal_id');
+    }
+
+    public function transferMasuk()
+    {
+        return $this->hasMany(TransferGudang::class, 'gudang_tujuan_id');
+    }
 }

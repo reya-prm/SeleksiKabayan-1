@@ -53,6 +53,14 @@ class GudangController extends Controller
             return back()->with('error', 'Gudang ini masih punya stok barang, tidak bisa dihapus.');
         }
 
+        if ($gudang->penjualans()->exists()) {
+            return back()->with('error', 'Gudang ini masih punya riwayat penjualan, tidak bisa dihapus.');
+        }
+
+        if ($gudang->transferKeluar()->exists() || $gudang->transferMasuk()->exists()) {
+            return back()->with('error', 'Gudang ini masih punya riwayat transfer, tidak bisa dihapus.');
+        }
+
         $gudang->delete();
 
         return redirect()->route('gudang.index')->with('success', 'Gudang berhasil dihapus.');

@@ -1,37 +1,47 @@
 @extends('layouts.app')
 
-@section('header_title', 'Dashboard Ringkasan')
+@section('header_title', 'Dashboard')
 
 @section('content')
-    <div class="relative overflow-x-auto bg-white shadow-sm rounded-lg border border-gray-200">
-        <table class="w-full text-sm text-left text-gray-700">
-            <thead class="text-xs uppercase bg-gray-50 border-b border-gray-200 text-gray-600">
-                <tr>
-                    <th scope="col" class="px-6 py-3 font-medium">SKU</th>
-                    <th scope="col" class="px-6 py-3 font-medium">Nama Barang</th>
-                    <th scope="col" class="px-6 py-3 font-medium">Kategori</th>
-                    <th scope="col" class="px-6 py-3 font-medium">Satuan</th>
-                    <th scope="col" class="px-6 py-3 font-medium">Harga Jual</th>
-                    <th scope="col" class="px-6 py-3 font-medium">Status</th>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded shadow p-4">
+            <p class="text-sm text-gray-500">Total Barang</p>
+            <p class="text-2xl font-bold">{{ $totalBarang }}</p>
+        </div>
+        <div class="bg-white rounded shadow p-4">
+            <p class="text-sm text-gray-500">Total Gudang</p>
+            <p class="text-2xl font-bold">{{ $totalGudang }}</p>
+        </div>
+        <div class="bg-white rounded shadow p-4">
+            <p class="text-sm text-gray-500">Total Pelanggan</p>
+            <p class="text-2xl font-bold">{{ $totalPelanggan }}</p>
+        </div>
+        <div class="bg-white rounded shadow p-4">
+            <p class="text-sm text-gray-500">Penjualan Hari Ini</p>
+            <p class="text-2xl font-bold">Rp {{ number_format($totalPenjualanHariIni, 0, ',', '.') }}</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded shadow p-4">
+        <h2 class="font-semibold mb-3">Barang dengan Stok Terendah</h2>
+        <table class="w-full border-collapse border border-gray-300">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border border-gray-300 px-4 py-2 text-left">Barang</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Gudang</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Qty</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse ($barang as $item)
-                    <tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
-                        <td class="px-6 py-4 font-mono text-gray-900">{{ $item->sku }}</td>
-                        <td class="px-6 py-4 font-medium text-gray-900">{{ $item->nama_barang }}</td>
-                        <td class="px-6 py-4">{{ $item->kategori }}</td>
-                        <td class="px-6 py-4">{{ $item->satuan }}</td>
-                        <td class="px-6 py-4">Rp {{ number_format($item->harga_jual, 0, ',', '.') }}</td>
-                        <td class="px-6 py-4">
-                            <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $item->status_aktif ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                {{ $item->status_aktif ? 'Aktif' : 'Nonaktif' }}
-                            </span>
-                        </td>
+                @forelse ($stokTerendah as $s)
+                    <tr>
+                        <td class="border border-gray-300 px-4 py-2">{{ $s->barang->nama_barang ?? '-' }}</td>
+                        <td class="border border-gray-300 px-4 py-2">{{ $s->gudang->nama_gudang ?? '-' }}</td>
+                        <td class="border border-gray-300 px-4 py-2 {{ $s->qty == 0 ? 'text-red-600 font-semibold' : '' }}">{{ $s->qty }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-gray-400">Belum ada data barang.</td>
+                        <td colspan="3" class="border border-gray-300 px-4 py-4 text-center text-gray-500">Belum ada data stok.</td>
                     </tr>
                 @endforelse
             </tbody>
